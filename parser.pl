@@ -55,7 +55,7 @@ must_blank --> blank, !, blanks.
 proto_blanks --> star(choice([must_blank, line_comment, multi_comment])).
 
 semicolon --> proto_blanks, ";", proto_blanks.
-semicolon(_) --> proto_blanks, ";", proto_blanks.
+semicolon([]) --> proto_blanks, ";", proto_blanks.
 
 comma --> proto_blanks, ",", proto_blanks.
 
@@ -212,14 +212,15 @@ option_def(O) -->
 
 field_options(O) --> brakets(star(assignment, comma, O)).
 
-field_label(required) --> "required".
-field_label(repeated) --> "repeated".
-field_label(optional) --> "optional".
+field_label([required]) --> "required", !.
+field_label([repeated]) --> "repeated", !.
+field_label([optional]) --> "optional", !.
+field_label([]) --> [].
 
 field(field(R, T, N, I, O)) -->
     with_blanks(
         [
-            question("repeated", R=true, R=false),
+            field_label(R),
             type(T),
             identifier(N),
             "=",
@@ -323,6 +324,15 @@ enum(enum(N, B)) -->
             block(enum_body(B))
         ]).
 
+%% Extensions
+
+extensions(extensions(From, To)) -->
+    with_blanks(
+        [
+            "extensions",
+            range(From-To)
+        ]).
+
 %% Message
 
 message_block(B) -->
@@ -336,6 +346,7 @@ message_block(B) -->
                 map_field,
                 field,
                 reserved,
+                extensions,
                 semicolon
             ]
         ),
