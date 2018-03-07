@@ -247,7 +247,7 @@ oneof(oneof(N, O)) -->
         [
             "oneof",
             identifier(N),
-            block(star(choice([oneof_field, semicolon]), O))
+            block(star(choice([oneof_field, semicolon]), proto_blanks, O))
         ]).
 
 
